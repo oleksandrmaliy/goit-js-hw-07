@@ -27,9 +27,9 @@ function onOpenModal(event) {
    <img class="gallery__image" src="${currentItem.dataset.source}" width="800" height="600">
 `);
 
-  modalWindow.show();
-
   window.addEventListener('keydown', onCloseModal);
+
+  modalWindow.show();
 }
 
 function onCloseModal(event) {

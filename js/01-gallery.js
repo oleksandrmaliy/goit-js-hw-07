@@ -1,45 +1,43 @@
 import { galleryItems } from './gallery-items.js';
-// Change code below this line
 
 const gallery = document.querySelector('.gallery');
 
-const galleryCollection = galleryItems
-  .map(
-    ({ preview, original, description }) =>
-      `<li class="gallery__item"><a class="gallery__link" href="large-image.jpg"><img class="gallery__image" src=${preview} data-source=${original} alt=${description}/></a></li>`
-  )
-  .join('');
+gallery.addEventListener('click', onShow);
 
-gallery.insertAdjacentHTML('afterbegin', galleryCollection);
+gallery.insertAdjacentHTML('afterbegin', makeGallery(galleryItems));
 
-gallery.addEventListener('click', onOpenModal);
+function makeGallery(galleryItems) {
+  return galleryItems
+    .map(({ description, original, preview }) => {
+      return `<div class="gallery__item"><a class="gallery__link"><img class="gallery__image" src="${preview}" data-source="${original}"    alt="${description}"/></a></div>`;
+    })
+    .join('');
+}
 
-function onOpenModal(event) {
+function onShow(event) {
   event.preventDefault();
 
-  const currentItem = event.target;
-
-  if (currentItem.nodeName !== 'IMG') {
+  if (event.target.nodeName !== 'IMG') {
     return;
   }
 
-  const modalWindow = basicLightbox.create(`
-   <img class="gallery__image" src="${currentItem.dataset.source}" width="800" height="600">
-`);
-
-  window.addEventListener('keydown', onCloseModal);
-
-  modalWindow.show();
+  const imgLink = event.target.dataset.source;
+  setModal(imgLink);
 }
 
-function onCloseModal(event) {
-  const openModal = document.querySelector('.basicLightbox');
+function setModal(imgLink) {
+  const instance = basicLightbox.create(`
+    <img src="${imgLink}">
+    `);
+  instance.show();
 
-  if (event.code === 'Escape') {
-    openModal.remove();
-  }
+  document.addEventListener('keydown', event => {
+    if (event.code !== 'Escape') {
+      return;
+    }
 
-  window.removeEventListener('keydown', onCloseModal);
+    instance.close();
+
+    document.removeEventListener('keydown', event);
+  });
 }
-
-// console.log(galleryItems);

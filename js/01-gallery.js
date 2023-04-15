@@ -1,43 +1,50 @@
 import { galleryItems } from './gallery-items.js';
+// Change code below this line
 
 const gallery = document.querySelector('.gallery');
+const makeGallery = galleryItems
+  .map(({ preview, original, description }) => {
+    return `<li class="galerry__item">
+    <a class="gallery__link" href="${original}">
+    <img class="gallery__image" src="${preview}" data-source="${original}" alt="${description}">
+    </a>
+    </li>`;
+  })
+  .join('');
 
-gallery.addEventListener('click', onShow);
+gallery.insertAdjacentHTML('beforeend', makeGallery);
+gallery.addEventListener('click', onOpenModal);
 
-gallery.insertAdjacentHTML('afterbegin', makeGallery(galleryItems));
+let instance;
 
-function makeGallery(galleryItems) {
-  return galleryItems
-    .map(({ description, original, preview }) => {
-      return `<div class="gallery__item"><a class="gallery__link"><img class="gallery__image" src="${preview}" data-source="${original}"    alt="${description}"/></a></div>`;
-    })
-    .join('');
-}
-
-function onShow(event) {
+function onOpenModal(event) {
   event.preventDefault();
 
-  if (event.target.nodeName !== 'IMG') {
+  const currentItem = event.target;
+
+  if (currentItem.nodeName !== 'IMG') {
     return;
   }
 
-  const imgLink = event.target.dataset.source;
-  setModal(imgLink);
+  instance = basicLightbox.create(
+    `<img class="gallery__image" src="${currentItem.dataset.source}" width="800" height="600">`,
+    {
+      onShow: () => {
+        window.addEventListener('keydown', closeByKey);
+      },
+      onClose: () => {
+        window.removeEventListener('keydown', closeByKey);
+      },
+    }
+  );
+
+  instance.show();
 }
 
-function setModal(imgLink) {
-  const instance = basicLightbox.create(`
-    <img src="${imgLink}">
-    `);
-  instance.show();
+function closeByKey(event) {
+  if (event.code !== 'Escape') {
+    return;
+  }
 
-  document.addEventListener('keydown', event => {
-    if (event.code !== 'Escape') {
-      return;
-    }
-
-    instance.close();
-
-    document.removeEventListener('keydown', event);
-  });
+  instance.close();
 }
